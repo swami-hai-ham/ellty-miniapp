@@ -7,7 +7,6 @@ import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
 import { CommentNode, type NodeData } from "./CommentNode"
 
-
 export default function DiscussionList() {
   const [roots, setRoots] = useState<NodeData[]>([])
   const [newValue, setNewValue] = useState("")
@@ -23,10 +22,7 @@ export default function DiscussionList() {
   const handleCreateRoot = async () => {
     setCreating(true)
     try {
-      await api.post(
-        "/nodes/root",
-        { startingNumber: Number(newValue) }
-      )
+      await api.post("/nodes/root", { startingNumber: Number(newValue) })
       setNewValue("")
       const updated = await api.get("/roots")
       setRoots(updated.data)
@@ -59,17 +55,20 @@ export default function DiscussionList() {
             onChange={e => setNewValue(e.target.value)}
             className="max-w-xs"
           />
-          <Button
-            disabled={creating || !newValue}
-            onClick={handleCreateRoot}
-          >Create</Button>
+          <Button disabled={creating || !newValue} onClick={handleCreateRoot}>
+            Create
+          </Button>
           {error && <span className="text-red-500 ml-2">{error}</span>}
         </Card>
       )}
       <div className="flex flex-col gap-4">
-        {roots.map(node => (
-          <CommentNode key={node.id} node={node} isAuthenticated={isAuthenticated} />
-        ))}
+        {roots.length === 0 ? (
+          <span className="text-muted-foreground text-center">No discussions found</span>
+        ) : (
+          roots.map(node => (
+            <CommentNode key={node.id} node={node} isAuthenticated={isAuthenticated} />
+          ))
+        )}
       </div>
     </div>
   )
