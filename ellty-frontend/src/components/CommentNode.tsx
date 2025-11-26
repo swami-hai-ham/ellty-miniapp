@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { toast } from "sonner"
 import { Card } from "@/components/ui/card"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import api from "@/utils/api"
 
 export type NodeData = {
@@ -12,6 +13,7 @@ export type NodeData = {
   operation: "add" | "sub" | "mul" | "div" | null
   rightOperand: number | null
   authorId: number
+  authorUsername: string
   createdAt: string
 }
 
@@ -48,27 +50,52 @@ export function CommentNode({ node, depth = 0, isAuthenticated }: Props) {
       setShowReplyBox(false)
       setChildren(null)
       setShowReplies(true)
-    } catch (e: any) {
-      const errors =
-        e?.response?.data?.error?.fieldErrors ||
-        e?.response?.data?.error?.formErrors ||
-        e?.response?.data?.message ||
-        e?.message ||
-        "Error"
+    } catch (e: unknown) {
+      // Typesafe error handling
+      const res =
+        typeof e === "object" && e && "response" in e
+          ? (e as { response: { data: unknown } }).response.data
+          : undefined
+      type FieldErrors = Record<string, string[]>
+      let errors: unknown =
+        res && typeof res === "object" && res !== null && "error" in res
+          ? (res as { error?: { fieldErrors?: FieldErrors; formErrors?: string[] } }).error?.fieldErrors ||
+            (res as { error?: { fieldErrors?: FieldErrors; formErrors?: string[] } }).error?.formErrors
+          : undefined
+  
+      if (!errors) {
+        errors =
+          res && typeof res === "object" && res !== null && "message" in res
+            ? (res as { message: string }).message
+            : e instanceof Error
+            ? e.message
+            : "Error"
+      }
       if (typeof errors === "string") {
         toast.error(errors)
       } else if (Array.isArray(errors)) {
-        errors.forEach((msg: string) => toast.error(msg))
-      } else if (typeof errors === "object") {
-        Object.values(errors).flat().forEach((msg: any) => toast.error(msg))
+        errors.forEach(msg => {
+          if (typeof msg === "string") toast.error(msg)
+          else toast.error("Unknown error")
+        })
+      } else if (typeof errors === "object" && errors !== null) {
+        Object.values(errors).flat().forEach(value => {
+          if (typeof value === "string") toast.error(value)
+          else toast.error("Unknown error")
+        })
       }
     }
     setLoading(false)
   }
+
   return (
     <Card className="ml-0" style={{ marginLeft: depth * 36 }}>
       <div className="p-4 flex flex-col gap-2">
-        <div>
+        <div className="flex items-center gap-2">
+          <Avatar className="w-7 h-7">
+            <AvatarFallback>{node.authorUsername[0]?.toUpperCase()}</AvatarFallback>
+          </Avatar>
+          <span className="font-medium">{node.authorUsername}</span>
           <span className="ml-2">{node.computedValue}</span>
           {node.operation && (
             <span className="ml-2 text-muted-foreground">
@@ -77,7 +104,7 @@ export function CommentNode({ node, depth = 0, isAuthenticated }: Props) {
           )}
           <span className="ml-2 text-xs text-muted-foreground">{new Date(node.createdAt).toLocaleString()}</span>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 mt-1">
           {children !== null && children.length === 0 ? (
             <span className="text-muted-foreground text-sm">No more replies</span>
           ) : (

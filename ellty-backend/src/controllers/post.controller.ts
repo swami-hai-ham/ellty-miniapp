@@ -22,24 +22,25 @@ export async function getRoots(req: Request, res: Response) {
       operation: true,
       operand: true,
       authorId: true,
-      createdAt: true
+      createdAt: true,
+      author: { select: { username: true } }
     }
   })
-  res.json(roots.map((x: any) => ({
+  res.json(roots.map(x => ({
     id: x.id,
     parentId: x.parentId,
     computedValue: x.value,
     operation: x.operation,
     rightOperand: x.operand,
     authorId: x.authorId,
+    authorUsername: x.author.username,
     createdAt: x.createdAt
   })))
 }
 
 export async function getChildren(req: Request, res: Response) {
   const parentId = Number(req.params.id)
-  if (isNaN(parentId))
-    return res.status(400).json({ success: false, message: "Invalid parent id" })
+  if (isNaN(parentId)) return res.status(400).json({ success: false, message: "Invalid parent id" })
   const children = await prisma.post.findMany({
     where: { parentId },
     select: {
@@ -49,19 +50,22 @@ export async function getChildren(req: Request, res: Response) {
       operation: true,
       operand: true,
       authorId: true,
-      createdAt: true
+      createdAt: true,
+      author: { select: { username: true } }
     }
   })
-  res.json(children.map((x: any) => ({
+  res.json(children.map(x => ({
     id: x.id,
     parentId: x.parentId,
     computedValue: x.value,
     operation: x.operation,
     rightOperand: x.operand,
     authorId: x.authorId,
+    authorUsername: x.author.username,
     createdAt: x.createdAt
   })))
 }
+
 
 export async function createRootNode(req: Request, res: Response) {
   const userId = (res.locals as any).id
