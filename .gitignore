@@ -8,5 +8,4 @@ npm-debug.log
 *.tgz
 .idea
 .vscode
-*.md
 pgdata
