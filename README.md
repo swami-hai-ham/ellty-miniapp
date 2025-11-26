@@ -21,6 +21,16 @@ This is a one-page full-stack application implementing a number-based communicat
 ### Prerequisites
 - Docker and Docker Compose installed.
 
+### Environment Setup
+Before starting the containers, copy the example environment files to actual `.env` files in the backend and frontend directories:
+
+```bash
+cp ellty-backend/.env.example ellty-backend/.env
+cp ellty-frontend/.env.example ellty-frontend/.env
+```
+
+Edit the `.env` files as needed to configure database URLs and API endpoints.
+
 ### Build and Run Containers
 At the project root, run:
 
@@ -28,18 +38,18 @@ At the project root, run:
 docker-compose up --build
 ```
 
-This command builds the `ellty-backend`, `ellty-frontend`, and `db` containers and starts them with appropriate port mappings:
+This command builds and starts the following containers with ports mapped as below:
 
-- Backend exposed at [http://localhost:3000](http://localhost:3000)
-- Frontend exposed at [http://localhost:5173](http://localhost:5173)
-- PostgreSQL database runs internally on default port `5432`
+- Backend accessible at [http://localhost:3000](http://localhost:3000)
+- Frontend accessible at [http://localhost:5173](http://localhost:5173)
+- PostgreSQL database running internally on port `5432`
 
 ***
 
 ### Docker Setup Summary
 
-- **Frontend Dockerfile** builds the React + Vite app, serves the production build on port 5173 with `serve`.
-- **Backend Dockerfile** installs dependencies, generates Prisma client, builds the TypeScript project, and pushes Prisma schema directly to the database on container start before launching the server.
-- **Database** uses official Postgres image with volume mounted at `/var/lib/postgresql` for data compatibility with Postgres 18+ Docker images.
+- **Frontend Dockerfile** builds the React + Vite app and serves the production build statically on port 5173 with `serve`.
+- **Backend Dockerfile** installs dependencies, generates the Prisma client, builds the TypeScript project, pushes the Prisma schema to the database on startup, and then starts the Express server.
+- **Database** uses the official Postgres image with volume mounted at `/var/lib/postgresql` for compatibility with Postgres 18+ Docker images.
 
 ***
