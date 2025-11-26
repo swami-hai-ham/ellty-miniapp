@@ -3,23 +3,29 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import api from "@/utils/api"
 import { Link } from "react-router-dom"
+import { toast } from "sonner"
 
 export default function Register() {
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
   const handleRegister = async () => {
     setLoading(true)
     setError(null)
     try {
       await api.post("/auth/register", { username, password })
-      window.location.href = "/login"
+      toast.success("Registration successful! Redirecting to login...", { duration: 3000 })
+      setTimeout(() => {
+        window.location.href = "/login"
+      }, 3000)
     } catch (e: any) {
       setError(e?.response?.data?.message ?? "Error")
     }
     setLoading(false)
   }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
       <div className="w-full max-w-md p-8 rounded-xl shadow-lg bg-card">
