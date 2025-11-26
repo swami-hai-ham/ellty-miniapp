@@ -91,19 +91,22 @@ export function CommentNode({ node, depth = 0, isAuthenticated }: Props) {
   return (
     <Card className="ml-0" style={{ marginLeft: depth * 36 }}>
       <div className="p-4 flex flex-col gap-2">
-        <div className="flex items-center gap-2">
-          <Avatar className="w-7 h-7">
+       <div className="flex flex-wrap items-center gap-2 min-w-0">
+          <Avatar className="w-7 h-7 shrink-0">
             <AvatarFallback>{node.authorUsername[0]?.toUpperCase()}</AvatarFallback>
           </Avatar>
-          <span className="font-medium">{node.authorUsername}</span>
-          <span className="ml-2">{node.computedValue}</span>
+          <span className="font-medium truncate max-w-[120px]">{node.authorUsername}</span>
+          <span className="ml-2 truncate max-w-[120px]">{node.computedValue}</span>
           {node.operation && (
-            <span className="ml-2 text-muted-foreground">
+            <span className="ml-2 text-muted-foreground break-all truncate max-w-[130px]">
               [{node.operation} {node.rightOperand}]
             </span>
           )}
-          <span className="ml-2 text-xs text-muted-foreground">{new Date(node.createdAt).toLocaleString()}</span>
+          <span className="ml-2 text-xs text-muted-foreground whitespace-nowrap">
+            {new Date(node.createdAt).toLocaleString()}
+          </span>
         </div>
+
         <div className="flex gap-2 mt-1">
           {children !== null && children.length === 0 ? (
             <span className="text-muted-foreground text-sm">No more replies</span>
